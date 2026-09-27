@@ -215,34 +215,38 @@ class adduser_module
 				{
 					$this->user_row['user_birthday'] = $data['user_birthday'];
 				}
+
 				if ($this->config['new_member_post_limit'] && $new_user)
 				{
 					$this->user_row['user_new'] = 1;
 				}
-				// Register user...
+
+				// Register user
 				$this->user_id = user_add($this->user_row, $cp_data);
+
 				if (!empty($data['group']))
 				{
 					if (!empty($group_default))
 					{
-						group_user_add($data['group'], array($this->user_id), false, false, true);
+						group_user_add($data['group'], [$this->user_id], false, false, true);
 					}
 					else
 					{
-						group_user_add($data['group'], array($this->user_id));
+						group_user_add($data['group'], [$this->user_id]);
 					}
 				}
 
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_USER_ADDED', time(), array($data['username']));
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_USER_ADDED', time(), [$data['username']]);
 
-				// This should not happen, because the required variables are listed above...
+				// This should not happen because the required variables are listed above
 				if ($this->user_id === false)
 				{
 					trigger_error($this->user->lang['NO_USER'], E_USER_ERROR);
 				}
 
-				// send a message to the user...if needed
-				$message = array();
+				// Send a message to the user if needed
+				$message = [];
+
 				if ($this->config['require_activation'] == USER_ACTIVATION_SELF && $this->config['email_enable'])
 				{
 					$message[] = $this->user->lang['ACP_ACCOUNT_INACTIVE'];
@@ -277,12 +281,13 @@ class adduser_module
 					$messenger->headers('X-AntiAbuse: Username - ' . $this->user->data['username']);
 					$messenger->headers('X-AntiAbuse: User IP - ' . $this->user->ip);
 
-					$messenger->assign_vars(array(
+					$messenger->assign_vars([
 						'WELCOME_MSG'	=> htmlspecialchars_decode(sprintf($this->user->lang['WELCOME_SUBJECT'], $this->config['sitename'])),
 						'USERNAME'		=> htmlspecialchars_decode($data['username']),
 						'PASSWORD'		=> htmlspecialchars_decode($data['new_password']),
-						'U_ACTIVATE'	=> "$server_url/ucp.$phpEx?mode=activate&u=$this->user_id&k=$this->user_actkey")
-					);
+
+						'U_ACTIVATE'	=> "$server_url/ucp.$phpEx?mode=activate&u=$this->user_id&k=$this->user_actkey",
+					]);
 
 					$messenger->send(NOTIFY_EMAIL);
 				}
@@ -290,22 +295,23 @@ class adduser_module
 				if ($this->config['require_activation'] == USER_ACTIVATION_ADMIN && !$admin_activate)
 				{
 					$phpbb_notifications = $phpbb_container->get('notification_manager');
-					$phpbb_notifications->add_notifications('notification.type.admin_activate_user', array(
+					$phpbb_notifications->add_notifications('notification.type.admin_activate_user', [
 						'user_id'		=> $this->user_id,
 						'user_actkey'	=> $this->user_row['user_actkey'],
 						'user_regdate'	=> $this->user_row['user_regdate'],
-					));
+					]);
 				}
 
 				$message[] = sprintf($this->user->lang['CONTINUE_EDIT_USER'], '<a href="' . append_sid("{$phpbb_admin_path}index.$phpEx", 'i=users&amp;mode=overview&amp;u=' . $this->user_id) . '">', $data['username'], '</a>');
 				$message[] = sprintf($this->user->lang['EDIT_USER_GROUPS'], '<a href="' . append_sid("{$phpbb_admin_path}index.$phpEx", 'i=users&amp;mode=groups&amp;u=' . $this->user_id) . '">', '</a>');
 				$message[] = adm_back_link($this->u_action);
 
-				trigger_error(implode('<br />', $message));
+				trigger_error(implode('<br>', $message));
 			}
 		}
 
 		$l_reg_cond = '';
+
 		switch ($this->config['require_activation'])
 		{
 			case USER_ACTIVATION_SELF:
@@ -324,43 +330,50 @@ class adduser_module
 		if ($this->config['allow_birthdays'])
 		{
 			$s_birthday_day_options = '<option value="0"' . ((!$data['bday_day']) ? ' selected="selected"' : '') . '>--</option>';
+
 			for ($i = 1; $i < 32; $i++)
 			{
 				$selected = ($i == $data['bday_day']) ? ' selected="selected"' : '';
-				$s_birthday_day_options .= "<option value=\"$i\"$selected>$i</option>";
+				$s_birthday_day_options .= "<option  value=\"$i\"$selected>$i</option>";
 			}
 
 			$s_birthday_month_options = '<option value="0"' . ((!$data['bday_month']) ? ' selected="selected"' : '') . '>--</option>';
+
 			for ($i = 1; $i < 13; $i++)
 			{
 				$selected = ($i == $data['bday_month']) ? ' selected="selected"' : '';
 				$s_birthday_month_options .= "<option value=\"$i\"$selected>$i</option>";
 			}
+
 			$s_birthday_year_options = '';
 
 			$now = getdate();
+
 			$s_birthday_year_options = '<option value="0"' . ((!$data['bday_year']) ? ' selected="selected"' : '') . '>--</option>';
+
 			for ($i = $now['year'] - 100; $i <= $now['year']; $i++)
 			{
 				$selected = ($i == $data['bday_year']) ? ' selected="selected"' : '';
 				$s_birthday_year_options .= "<option value=\"$i\"$selected>$i</option>";
 			}
+
 			unset($now);
 
-			$template->assign_vars(array(
+			$template->assign_vars([
 				'S_BIRTHDAY_DAY_OPTIONS'	=> $s_birthday_day_options,
 				'S_BIRTHDAY_MONTH_OPTIONS'	=> $s_birthday_month_options,
 				'S_BIRTHDAY_YEAR_OPTIONS'	=> $s_birthday_year_options,
 				'S_BIRTHDAYS_ENABLED'		=> true,
-			));
+			]);
 		}
 
-		// Get the groups, so that the user can be added to them
+		// Get the groups so that the user can be added to them
 		$s_group_options = $this->get_groups($group_selected);
 
 		$timezone_selects = phpbb_timezone_select($template, $this->user, $data['tz'], true);
-		$template->assign_vars(array(
-			'ERROR'				=> (sizeof($error)) ? implode('<br />', $error) : '',
+
+		$template->assign_vars([
+			'ERROR'				=> (count($error)) ? implode('<br>', $error) : '',
 			'NEW_USERNAME'		=> $data['username'],
 			'EMAIL'				=> $data['email'],
 			'PASSWORD'			=> $data['new_password'],
@@ -369,7 +382,7 @@ class adduser_module
 			'L_PASSWORD_EXPLAIN'	=> $this->user->lang($this->config['pass_complex'] . '_EXPLAIN', $this->user->lang('CHARACTERS', (int) $this->config['min_pass_chars']), $this->user->lang('CHARACTERS', (int) $this->config['max_pass_chars'])) . ' ' . $this->user->lang['PASSWORD_EXPLAIN'],
 			'L_USERNAME_EXPLAIN'	=> $this->user->lang($this->config['allow_name_chars'] . '_EXPLAIN', $this->user->lang('CHARACTERS', (int) $this->config['min_name_chars']), $this->user->lang('CHARACTERS', (int) $this->config['max_name_chars'])),
 			'L_ADD_USER_EXPLAIN'	=> sprintf($this->user->lang['ADD_USER_EXPLAIN'], '<a href="' . append_sid("{$phpbb_admin_path}index.$phpEx", 'i=acp_board&amp;mode=registration') . '">', '</a>'),
-			'L_REG_COND'		=> $l_reg_cond,
+			'L_REG_COND'			=> $l_reg_cond,
 
 			'S_USER_ADD'		=> true,
 			'S_GROUP_OPTIONS'	=> $s_group_options,
@@ -380,16 +393,15 @@ class adduser_module
 
 			'U_ADMIN_ACTIVATE'	=> ($admin_activate) ? 'checked="checked"' : '',
 			'U_GROUP_DEFAULT'	=> ($group_default) ? 'checked="checked"' : '',
-		));
+		]);
 
-		$this->user->profile_fields = array();
+		$this->user->profile_fields = [];
 
 		// Generate profile fields -> Template Block Variable profile_fields
 		$cp->generate_profile_fields('profile', $this->user->get_iso_lang_id());
-
 	}
 
-	//function to generate passwords
+	// Function to generate passwords
 	private function generate_password($length, $type)
 	{
 		$lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -398,25 +410,32 @@ class adduser_module
 		$specialcharacters = "{}[];:,./<>?_+~!@#";
 
 		$pword_string = '';
-		//mt_srand(crc32(microtime()));
+
 		$max = strlen($lowercase) - 1;
+
 		for ($x = 0; $x < abs($length/3); $x++)
 		{
 			$pword_string .= $lowercase[mt_rand(0, $max)];
 		}
+
 		$max = strlen($uppercase) - 1;
+
 		for ($x = 0; $x < abs($length/3); $x++)
 		{
 			$pword_string .= $uppercase[mt_rand(0, $max)];
 		}
+
 		$max = strlen($numbers) - 1;
+
 		for ($x = 0; $x < abs($length/3); $x++)
 		{
 			$pword_string .= $numbers[mt_rand(0, $max)];
 		}
+
 		if ($type == 'PASS_TYPE_SYMBOL')
 		{
 			$max = strlen($specialcharacters) - 1;
+
 			for ($x = 0; $x < abs($length/3); $x++)
 			{
 				$pword_string .= $specialcharacters[mt_rand(0, $max)];
@@ -426,10 +445,11 @@ class adduser_module
 		return str_shuffle($pword_string);
 	}
 
-	//function to return groups that are allowed
+	// Function to return groups that are allowed
 	private function get_groups($group_selected)
 	{
-		$ignore_groups = array('BOTS', 'GUESTS', 'REGISTERED', 'NEWLY_REGISTERED');
+		$ignore_groups = ['BOTS', 'GUESTS', 'REGISTERED', 'NEWLY_REGISTERED'];
+
 		$sql = 'SELECT group_name, group_id, group_type
 			FROM ' . GROUPS_TABLE . '
 			WHERE ' . $this->db->sql_in_set('group_name', $ignore_groups, true) . '
@@ -437,31 +457,37 @@ class adduser_module
 		$result = $this->db->sql_query($sql);
 
 		$s_group_options = '<select id="group" name="group"><option value="0">' . $this->user->lang['NO_GROUP'] . '</option>';
+
 		while ($row = $this->db->sql_fetchrow($result))
 		{
 			if (!$this->config['coppa_enable'] && $row['group_name'] == 'REGISTERED_COPPA')
 			{
 				continue;
 			}
+
 			$selected = $row['group_id'] == $group_selected ? ' selected="selected"' : '';
 			$s_group_options .= '<option' . (($row['group_type'] == GROUP_SPECIAL) ? ' class="sep"' : '') . ' value="' . $row['group_id'] . '"' . $selected . '>' . (($row['group_type'] == GROUP_SPECIAL) ? $this->user->lang['G_' . $row['group_name']] : $row['group_name']) . '</option>';
 		}
+
 		$s_group_options .='</select>';
 		$this->db->sql_freeresult($result);
 
 		return $s_group_options;
 	}
-	/*
+
+	/**
 	 * Get an array that represents directory tree
 	 */
 	public function dir_to_array($directory)
 	{
-		$directories = glob($directory . '/*' , GLOB_ONLYDIR);
-		$dir_array = array();
+		$directories = glob($directory . '/*', GLOB_ONLYDIR);
+		$dir_array = [];
+
 		foreach ($directories as $key => $value)
 		{
 			$dir_array[] = substr(strrchr($value, '/'), 1);
 		}
+
 		return $dir_array;
 	}
 }
