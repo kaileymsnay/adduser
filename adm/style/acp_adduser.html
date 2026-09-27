@@ -1,7 +1,7 @@
 {% include 'overall_header.html' %}
 
 <h1>{{ lang('ADD_USER') }}</h1>
-<p>{{ lang('ADD_USER_EXPLAIN') }}</p>
+<p>{{ L_ADD_USER_EXPLAIN }}</p>
 
 <form id="register" method="post" autocomplete="off" action="{{ U_ACTION }}">
 
@@ -14,10 +14,10 @@
 
 	<fieldset>
 		<legend>{{ lang('REGISTRATION') }}</legend>
-		<p>{{ lang('REG_COND') }}</p>
+		<p>{{ L_REG_COND }}</p>
 
 		<dl>
-			<dt><label for="username">{{ lang('USERNAME') ~ lang('COLON') }}</label><br><span>{{ lang('USERNAME_EXPLAIN') }}</span></dt>
+			<dt><label for="username">{{ lang('USERNAME') ~ lang('COLON') }}</label><br><span>{{ L_USERNAME_EXPLAIN }}</span></dt>
 			<dd><input class="medium" type="text" id="username" name="username" size="25" maxlength="40" value="{{ NEW_USERNAME }}" /></dd>
 		</dl>
 		<dl>
@@ -25,7 +25,7 @@
 			<dd><input class="medium" type="text" name="email" id="email" size="25" maxlength="255" value="{{ EMAIL }}" /></dd>
 		</dl>
 		<dl>
-			<dt><label for="new_password">{{ lang('PASSWORD') ~ lang('COLON') }}</label><br><span>{{ lang('PASSWORD_EXPLAIN') }}</span></dt>
+			<dt><label for="new_password">{{ lang('PASSWORD') ~ lang('COLON') }}</label><br><span>{{ L_PASSWORD_EXPLAIN }}</span></dt>
 			<dd><input type="password" name="new_password" id="new_password" size="25" value="{{ PASSWORD }}" class="inputbox autowidth" title="{{ lang('NEW_PASSWORD') }}" /></dd>
 		</dl>
 		<dl>
