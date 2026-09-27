@@ -331,7 +331,7 @@ class adduser_module
 		{
 			$s_birthday_day_options = '<option value="0"' . ((!$data['bday_day']) ? ' selected="selected"' : '') . '>--</option>';
 
-			for ($i = 1; $i < 32;  $i++)
+			for ($i = 1; $i < 32; $i++)
 			{
 				$selected = ($i == $data['bday_day']) ? ' selected="selected"' : '';
 				$s_birthday_day_options .= "<option  value=\"$i\"$selected>$i</option>";
