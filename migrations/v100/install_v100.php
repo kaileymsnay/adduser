@@ -1,9 +1,9 @@
 <?php
 /**
  *
- * @package phpBB Extension - Add User
- * @author RMcGirr83  (Rich McGirr) rmcgirr83@rmcgirr83.org
- * @copyright (c) 2014 phpbbmodders.net
+ * Add User extension for the phpBB Forum Software package
+ *
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
@@ -19,38 +19,38 @@ class install_v100 extends \phpbb\db\migration\migration
 
 	static public function depends_on()
 	{
-		return array('\phpbb\db\migration\data\v310\gold');
+		return ['\phpbb\db\migration\data\v310\gold'];
 	}
 
 	public function update_data()
 	{
-		return array(
-			array('config.add', array('adduser_version', '1.0.0')),
+		return [
+			['config.add', ['adduser_version', '1.0.0']],
 
-			array('module.add', array(
+			['module.add', [
 				'acp',
 				'ACP_CAT_USERS',
-				array(
+				[
 					'module_basename'	=> '\phpbbmodders\adduser\acp\adduser_module',
 					'auth'				=> 'ext_phpbbmodders/adduser && acl_a_user',
-					'modes'				=> array('main'),
-				),
-			)),
-		);
+					'modes'				=> ['main'],
+				],
+			]],
+		];
 	}
 
 	public function revert_data()
 	{
-		return array(
-			array('config.remove', array('adduser_version')),
+		return [
+			['config.remove', ['adduser_version']],
 
-			array('module.remove', array(
+			['module.remove', [
 				'acp',
 				'ACP_CAT_USERS',
-				array(
+				[
 					'module_basename'	=> '\phpbbmodders\adduser\acp\adduser_module',
-				),
-			)),
-		);
+				],
+			]],
+		];
 	}
 }

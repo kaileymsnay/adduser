@@ -1,28 +1,19 @@
-#phpBB Add User Extension
+# Add User
 
-[![Build Status](https://travis-ci.org/phpbbmodders/phpbb-3.1-ext-adduser.svg)](https://travis-ci.org/phpbbmodders/phpbb-3.1-ext-adduser)
-##About
-phpBB Add User Extension allows an administrator of a forum to add a user into the phpBB database.
+Allows administrators to add users to their board.
 
-##Features
-- Allows admin to enter in custom profile fields for the user
-- Allows admin to enter in a password or have one generated
-- Allows admin to set a users birthday if birthdays are allowed on the forum
-- Email will be sent to the newly added user
+## Installation
 
+1. Copy the extension to: `/ext/phpbbmodders/adduser`
+2. In the Administration Control Panel, go to: **Customise → Manage extensions**
+3. Enable the **Add User** extension
 
-##Installation
-### 1. clone
-Clone (or download and move) the repository into the folder phpBB3/ext/phpbbmodders/adduser:
+## Automated testing
 
-```
-cd phpBB3
-git clone https://github.com/phpbbmodders/phpbb-3.1-ext-adduser ext/phpbbmodders/adduser/
-```
+We use automated unit tests to prevent regressions. Check out our build below:
 
-### 2. activate
-Go to admin panel -> tab customise -> Manage extensions -> enable Add User
+[![Tests](https://github.com/phpbbmodders/adduser/actions/workflows/tests.yml/badge.svg)](https://github.com/phpbbmodders/adduser/actions/workflows/tests.yml)
 
-##Licensing
-phpBB Add User Mod is distributed under the terms of the GNU General Public
-License 2 (GPL). A copy has been included in the package (license.txt).
+## License
+
+Licensed under the [GNU General Public License v2](license.txt)

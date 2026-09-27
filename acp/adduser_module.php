@@ -1,18 +1,20 @@
 <?php
 /**
  *
- * @package phpBB Extension - Add User
- * @author RMcGirr83  (Rich McGirr) rmcgirr83@rmcgirr83.org
- * @copyright (c) 2014 phpbbmodders.net
+ * Add User extension for the phpBB Forum Software package
+ *
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
  */
 
 namespace phpbbmodders\adduser\acp;
 
+/**
+ * Add User ACP module
+ */
 class adduser_module
 {
-
 	/** @var string */
 	public $u_action;
 
@@ -31,25 +33,24 @@ class adduser_module
 		$new_user = $request->variable('new_user', 0);
 
 		$this->page_title = $this->user->lang['ACP_ADD_USER'];
+
+		// Load a template from adm/style for our ACP page
 		$this->tpl_name = 'acp_adduser';
 
-		//include files we need to add a user
+		// Include files needed to add a user
 		if (!function_exists('user_add'))
 		{
 			include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 		}
 
-		// include lang files we need
-		$this->user->add_lang(array('posting', 'ucp', 'acp/users', 'acp/groups'));
+		// Include lang files
+		$this->user->add_lang(['posting', 'ucp', 'acp/users', 'acp/groups']);
 
-		// add custom profile fields
+		// Add custom profile fields
 		$cp = $phpbb_container->get('profilefields.manager');
 
-		//set empty error strings
-		$error = $cp_data = $cp_error = array();
-
-		// Load a template from adm/style for our ACP page
-		$this->tpl_name = 'acp_adduser';
+		// Set empty error strings
+		$error = $cp_data = $cp_error = [];
 
 		// Define the name of the form for use as a form key
 		add_form_key('acp_adduser');
@@ -57,19 +58,19 @@ class adduser_module
 		// Try to automatically determine the timezone and daylight savings time settings
 		$timezone = $this->config['board_timezone'];
 
-		$data = array(
+		$data = [
 			'username'			=> $request->variable('username', '', true),
 			'new_password'		=> $request->variable('new_password', '', true),
 			'password_confirm'	=> $request->variable('password_confirm', '', true),
 			'email'				=> strtolower($request->variable('email', '')),
 			'lang'				=> basename($request->variable('lang', $this->user->lang_name)),
 			'tz'				=> $request->variable('tz', $timezone),
-			'group' 			=> $request->variable('group', 0),
-		);
+			'group'				=> $request->variable('group', 0),
+		];
 
-		// build an array of all lang directories for the extension and check to make sure we have the lang available that is being chosen
-		// if the lang isn't present then errors will present themselves due to no email template found
-		$dir_array = $this->dir_to_array($phpbb_root_path .'ext/phpbbmodders/adduser/language');
+		// Build an array of all lang directories for the extension and check to make sure the lang being chosen
+		// is available. If the lang isn't present then errors will present themselves due to no email template found.
+		$dir_array = $this->dir_to_array($phpbb_root_path . 'ext/phpbbmodders/adduser/language');
 
 		if (!in_array($data['lang'], $dir_array))
 		{
@@ -86,7 +87,7 @@ class adduser_module
 			$data['user_birthday'] = sprintf('%2d-%2d-%4d', $data['bday_day'], $data['bday_month'], $data['bday_year']);
 		}
 
-		// if form is submitted
+		// If form is submitted
 		if ($request->is_set_post('submit'))
 		{
 			// Test if form key is valid
@@ -95,7 +96,7 @@ class adduser_module
 				trigger_error('FORM_INVALID');
 			}
 
-			// lets create a wacky new password for our user...but only if there is nothing for a password already
+			// Create a new password for our user only if there is nothing  for a password already
 			if (empty($data['new_password']) && empty($data['password_confirm']))
 			{
 				if ($this->config['pass_complex'] == 'PASS_TYPE_ANY' || $this->config['pass_complex'] == 'PASS_TYPE_CASE')
@@ -115,38 +116,38 @@ class adduser_module
 				}
 			}
 
-			// validate entries
-			$validate_array = array(
-				'username'			=> array(
-					array('string', false, $this->config['min_name_chars'], $this->config['max_name_chars']),
-					array('username', '')),
-				'email'				=> array(
-					array('string', false, 6, 60),
-					array('user_email')),
-				'new_password'		=> array(
-					array('string', false, $this->config['min_pass_chars'], $this->config['max_pass_chars']),
-					array('password')),
-				'password_confirm'	=> array('string', false, $this->config['min_pass_chars'], $this->config['max_pass_chars']),
-				'tz'				=> array('timezone'),
-				'lang'				=> array('language_iso_name'),
-			);
+			// Validate entries
+			$validate_array = [
+				'username'			=> [
+					['string', false, $this->config['min_name_chars'], $this->config['max_name_chars']],
+					['username', '']],
+				'email'				=> [
+					['string', false, 6, 60],
+					['user_email']],
+				'new_password'		=> [
+					['string', false, $this->config['min_pass_chars'], $this->config['max_pass_chars']],
+					['password']],
+				'password_confirm'	=> ['string', false, $this->config['min_pass_chars'], $this->config['max_pass_chars']],
+				'tz'				=> ['timezone'],
+				'lang'				=> ['language_iso_name'],
+			];
 
 			if ($this->config['allow_birthdays'])
 			{
-				$validate_array = array_merge($validate_array, array(
-					'bday_day'		=> array('num', true, 1, 31),
-					'bday_month'	=> array('num', true, 1, 12),
-					'bday_year'		=> array('num', true, 1901, gmdate('Y', time()) + 50),
-					'user_birthday' => array('date', true),
-				));
+				$validate_array = array_merge($validate_array, [
+					'bday_day'		=> ['num', true, 1, 31],
+					'bday_month'	=> ['num', true, 1, 12],
+					'bday_year'		=> ['num', true, 1901, gmdate('Y', time()) + 50],
+					'user_birthday'	=> ['date', true],
+				]);
 			}
 
 			$error = validate_data($data, $validate_array);
 
-			// validate custom profile fields
+			// Validate custom profile fields
 			$cp->submit_cp_field('profile', $this->user->get_iso_lang_id(), $cp_data, $error);
 
-			if (sizeof($cp_error))
+			if (count($cp_error))
 			{
 				$error = array_merge($error, $cp_error);
 			}
@@ -157,21 +158,21 @@ class adduser_module
 			}
 
 			// Replace "error" strings with their real, localised form
-			$error = array_map(array($this->user, 'lang'), $error);
+			$error = array_map([$this->user, 'lang'], $error);
 
-			if (!sizeof($error))
+			if (!count($error))
 			{
 				$server_url = generate_board_url();
 
 				$sql = 'SELECT group_id
-						FROM ' . GROUPS_TABLE . "
-						WHERE group_name = 'REGISTERED'
-							AND group_type = " . GROUP_SPECIAL;
+					FROM ' . GROUPS_TABLE . "
+					WHERE group_name = 'REGISTERED'
+						AND group_type = " . GROUP_SPECIAL;
 				$result = $this->db->sql_query($sql);
 				$group_id = $this->db->sql_fetchfield('group_id');
 				$this->db->sql_freeresult($result);
 
-				// use group_id here
+				// Use group_id here
 				if (!$group_id)
 				{
 					trigger_error('NO_GROUP');
@@ -195,7 +196,7 @@ class adduser_module
 				// Instantiate passwords manager
 				$passwords_manager = $phpbb_container->get('passwords.manager');
 
-				$this->user_row = array(
+				$this->user_row = [
 					'username'				=> $data['username'],
 					'user_password'			=> $passwords_manager->hash($data['new_password']),
 					'user_email'			=> $data['email'],
@@ -208,7 +209,7 @@ class adduser_module
 					'user_regdate'			=> time(),
 					'user_inactive_reason'	=> $this->user_inactive_reason,
 					'user_inactive_time'	=> $this->user_inactive_time,
-				);
+				];
 
 				if ($this->config['allow_birthdays'])
 				{
@@ -369,7 +370,6 @@ class adduser_module
 			'L_USERNAME_EXPLAIN'	=> $this->user->lang($this->config['allow_name_chars'] . '_EXPLAIN', $this->user->lang('CHARACTERS', (int) $this->config['min_name_chars']), $this->user->lang('CHARACTERS', (int) $this->config['max_name_chars'])),
 			'L_ADD_USER_EXPLAIN'	=> sprintf($this->user->lang['ADD_USER_EXPLAIN'], '<a href="' . append_sid("{$phpbb_admin_path}index.$phpEx", 'i=acp_board&amp;mode=registration') . '">', '</a>'),
 			'L_REG_COND'		=> $l_reg_cond,
-			'L_MOD_VERSION'		=> sprintf($this->user->lang['MOD_VERSION'] , $this->config['adduser_version']),
 
 			'S_USER_ADD'		=> true,
 			'S_GROUP_OPTIONS'	=> $s_group_options,
@@ -402,24 +402,24 @@ class adduser_module
 		$max = strlen($lowercase) - 1;
 		for ($x = 0; $x < abs($length/3); $x++)
 		{
-			$pword_string .= $lowercase{mt_rand(0, $max)};
+			$pword_string .= $lowercase[mt_rand(0, $max)];
 		}
 		$max = strlen($uppercase) - 1;
 		for ($x = 0; $x < abs($length/3); $x++)
 		{
-			$pword_string .= $uppercase{mt_rand(0, $max)};
+			$pword_string .= $uppercase[mt_rand(0, $max)];
 		}
 		$max = strlen($numbers) - 1;
 		for ($x = 0; $x < abs($length/3); $x++)
 		{
-			$pword_string .= $numbers{mt_rand(0, $max)};
+			$pword_string .= $numbers[mt_rand(0, $max)];
 		}
 		if ($type == 'PASS_TYPE_SYMBOL')
 		{
 			$max = strlen($specialcharacters) - 1;
 			for ($x = 0; $x < abs($length/3); $x++)
 			{
-				$pword_string .= $specialcharacters{mt_rand(0, $max)};
+				$pword_string .= $specialcharacters[mt_rand(0, $max)];
 			}
 		}
 
@@ -452,8 +452,8 @@ class adduser_module
 		return $s_group_options;
 	}
 	/*
-     * Get an array that represents directory tree
-     */
+	 * Get an array that represents directory tree
+	 */
 	public function dir_to_array($directory)
 	{
 		$directories = glob($directory . '/*' , GLOB_ONLYDIR);
